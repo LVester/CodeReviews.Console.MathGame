@@ -11,7 +11,7 @@
                 Console.WriteLine("-------------------------------------------------");
                 Console.WriteLine("Welcome to the Math Game!");
                 Console.WriteLine("-------------------------------------------------");
-                Console.WriteLine(@"What game would you like to play? Choose one from the options below:
+                Console.WriteLine(@"What game mode would you like to play?:
                     A - Addition
                     S - Subtraction
                     M - Multiplication
@@ -19,49 +19,89 @@
                     Q - Quit the game");
                 Console.WriteLine("-------------------------------------------------");
 
-                var gameSelected = Console.ReadLine();
+                string gameMode = "";
+                string symbol = "";
 
-                switch (gameSelected.Trim().ToUpper())
+                bool validSelection = true;
+                do
                 {
-                    case "A":
-                        Game("Addition", "+");
-                        break;
-                    case "S":
-                        Game("Subtraction", "-");
-                        break;
-                    case "M":
-                        Game("Multiplication", "*");
-                        break;
-                    case "D":
-                        Game("Division", "/");
-                        break;
-                    case "Q":
-                        Console.WriteLine("Thank you for playing! Goodbye!");
-                        break;
-                    default:
-                        Console.WriteLine("Invalid selection. Please restart the game and choose a valid option.");
-                        break;
-                }
+                    var gameSelected = Console.ReadLine();
+                    validSelection = true;
+
+                    switch (gameSelected.Trim().ToUpper())
+                    {
+                        case "A":
+                            gameMode = "Addition";
+                            symbol = "+";
+                            break;
+                        case "S":
+                            gameMode = "Subtraction";
+                            symbol = "-";
+                            break;
+                        case "M":
+                            gameMode = "Multiplication";
+                            symbol = "*";
+                            break;
+                        case "D":
+                            gameMode = "Division";
+                            symbol = "/";
+                            break;
+                        case "Q":
+                            Console.WriteLine("Thank you for playing!");
+                            Environment.Exit(0);
+                            break;
+                        default:
+                            Console.WriteLine("Invalid selection. Please choose a valid option.");
+                            validSelection = false;
+                            break;
+                    }
+                } while (!validSelection);
+
+                Console.WriteLine("-------------------------------------------------");
+                Console.WriteLine($"You have chosen {gameMode}. How many rounds do you want to go?");
+                
+                string rounds = Console.ReadLine();
+                rounds = Helpers.ValidateInput(rounds);
+
+                Console.WriteLine("-------------------------------------------------");
+
+                Game(symbol, Int32.Parse(rounds));
             }
 
-            void Game(string gameMode, string symbol)
+            void Game(string symbol, int rounds)
             {
-                Console.WriteLine($"You chose the {gameMode} Game!");
-
                 var rand = new Random();
                 int score = 0;
 
                 int firstNumber;
                 int secondNumber;
 
-                for (int i = 0; i < 2; i++)
+                HashSet<string> askedQuestions = new HashSet<string>();
+
+                for (int i = 0; i < rounds; i++)
                 {
-                    firstNumber = rand.Next(1, 9);
-                    secondNumber = rand.Next(1, 9);
+                    do
+                    {
+                        if (symbol == "/")
+                        {
+                            do
+                            {
+                                firstNumber = rand.Next(1, 12);
+                                secondNumber = rand.Next(2, 12);
+                            } while (firstNumber % secondNumber != 0);
+                        }
+                        else
+                        {
+                            firstNumber = rand.Next(1, 9);
+                            secondNumber = rand.Next(1, 9);
+                        }
+                    } while (!askedQuestions.Add($"{firstNumber}{symbol}{secondNumber}"));
+
                     int correctAnswer = 0;
 
                     Console.WriteLine($"What is {firstNumber} {symbol} {secondNumber}?");
                     var playerAnswer = Console.ReadLine();
+                    playerAnswer = Helpers.ValidateInput(playerAnswer);
 
                     switch (symbol)
                     {
@@ -88,51 +128,7 @@
                         Console.WriteLine($"Incorrect. The correct answer is {correctAnswer}.");
                 }
 
-                Console.WriteLine($"Your final score is {score} out of 2.");
-            }
-
-            void AdditionGame()
-            {
-                Console.WriteLine("You chose the Addition Game!");
-
-                var rand = new Random();
-                int score = 0;
-
-                int firstNumber;
-                int secondNumber;
-
-                for (int i = 0; i < 5; i++)
-                {
-                    firstNumber = rand.Next(1, 9);
-                    secondNumber = rand.Next(1, 9);
-
-                    Console.WriteLine($"What is {firstNumber} + {secondNumber}?");
-                    var result = Console.ReadLine();
-
-                    if (Int32.Parse(result) == firstNumber + secondNumber)
-                    {
-                        Console.WriteLine("Correct!");
-                        score++;
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Incorrect. The correct answer is {firstNumber + secondNumber}.");
-                    }
-
-                    if(i == 4) Console.WriteLine($"Your final score is {score} out of 5.");
-                }
-            }
-            void SubtractionGame()
-            {
-                Console.WriteLine("You chose the Subtraction Game!");
-            }
-            void MultiplicationGame()
-            {
-                Console.WriteLine("You chose the Multiplication Game!");
-            }
-            void DivisionGame()
-            {
-                Console.WriteLine("You chose the Division Game!");
+                Console.WriteLine($"Your final score is {score} out of {rounds}.");
             }
         }
     }
